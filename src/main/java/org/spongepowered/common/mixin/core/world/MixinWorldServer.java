@@ -54,6 +54,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -322,4 +323,10 @@ public abstract class MixinWorldServer extends MixinWorld {
     private void onGetSpawnList(EnumCreatureType creatureType, BlockPos pos, CallbackInfoReturnable<BiomeGenBase.SpawnListEntry> callbackInfo) {
         StaticMixinHelper.gettingSpawnList = true;
     }
+
+    @Override
+    public WorldStorage getWorldStorage() {
+        return (WorldStorage) ((WorldServer) (Object) this).theChunkProviderServer;
+    }
+
 }

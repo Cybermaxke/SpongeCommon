@@ -24,20 +24,34 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.world.storage.ChunkDataStream;
+import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.world.storage.SpongeChunkDataStream;
+import org.spongepowered.common.world.storage.WorldStorageUtil;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkProviderServer.class)
-public abstract class MixinChunkProviderServer {
+public abstract class MixinChunkProviderServer implements WorldStorage {
 
     @Shadow public WorldServer worldObj;
+    @Shadow private IChunkLoader chunkLoader;
+
     @Shadow public abstract Chunk provideChunk(int x, int z);
 
     @Redirect(method = "populate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
@@ -49,4 +63,28 @@ public abstract class MixinChunkProviderServer {
         world.getCauseTracker().setCapturingTerrainGen(false);
         world.getCauseTracker().setProcessingCaptureCause(false);
     }
+
+    @Override
+    public ChunkDataStream getGeneratedChunks() {
+        if (!(this.chunkLoader instanceof IMixinAnvilChunkLoader)) {
+            throw new UnsupportedOperationException("unknown chunkLoader");
+        }
+        return new SpongeChunkDataStream(((IMixinAnvilChunkLoader) this.chunkLoader).getWorldDir());
+    }
+
+    @Override
+    public CompletableFuture<Boolean> doesChunkExist(Vector3i chunkCoords) {
+        return WorldStorageUtil.doesChunkExist(this.worldObj, this.chunkLoader, chunkCoords);
+    }
+
+    @Override
+    public CompletableFuture<Optional<DataContainer>> getChunkData(Vector3i chunkCoords) {
+        return WorldStorageUtil.getChunkData(this.worldObj, this.chunkLoader, chunkCoords);
+    }
+
+    @Override
+    public WorldProperties getWorldProperties() {
+        return (WorldProperties) this.worldObj.getWorldInfo();
+    }
+
 }
