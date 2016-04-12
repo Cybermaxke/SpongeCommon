@@ -127,8 +127,8 @@ public class DataUtil {
                     }
                 }
             } catch (Exception e) {
-                new InvalidDataException("Could not deserialize " + clazzName
-                                         + "! Don't worry though, we'll try to deserialize the rest of the data.", e).printStackTrace();
+                new InvalidDataException("Could not translate " + clazzName
+                                         + "! Don't worry though, we'll try to translate the rest of the data.", e).printStackTrace();
             }
         }
         return builder.build();
@@ -151,7 +151,7 @@ public class DataUtil {
                     }
                 }
             } catch (Exception e) {
-                new InvalidDataException("Could not deserialize " + clazzName + "!", e).printStackTrace();
+                new InvalidDataException("Could not translate " + clazzName + "!", e).printStackTrace();
             }
         }
         return builder.build();
