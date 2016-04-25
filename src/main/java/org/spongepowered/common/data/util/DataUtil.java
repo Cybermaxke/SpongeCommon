@@ -48,9 +48,12 @@ import org.spongepowered.common.data.SpongeDataManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public class DataUtil {
+
+    private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
         if (!checkNotNull(dataView).contains(checkNotNull(query))) {
@@ -196,4 +199,7 @@ public class DataUtil {
         return new Vector3d(x, y, z);
     }
 
+    public static Supplier<InvalidDataException> dataNotFound() {
+        return INVALID_DATA_EXCEPTION_SUPPLIER;
+    }
 }
